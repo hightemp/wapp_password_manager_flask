@@ -1,0 +1,14 @@
+{% import "macros.html" as macros %}
+{% include "b_header.html" %}
+
+<form action="">
+
+<div class="wrapper">
+    {{ macros.list_panel(aGroups, sSelGroup, "group") }}
+    {% if sSelGroup %}
+    {{ macros.tree_panel(aCategories, sSelCategory, "category", aOpenedCategories) }}
+    {% endif %}
+</div>
+
+</form>
+{% include "b_footer.html" %}
