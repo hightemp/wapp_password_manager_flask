@@ -178,7 +178,17 @@ def fnIterCategories(iGroupID, aOpened, aCategories=[], iLevel=0):
         
         return aNewCategories
 
+sSelGroup = ''
+sSelCategory = ''
+sSelAccount = ''
+
 aGroupFields = {
+    'id': {
+        'name': 'id',
+        'type': 'hidden',
+        'field_name': 'id',
+        'value': '',
+    },
     'name': {
         'name': 'Название',
         'type': 'text',
@@ -188,6 +198,12 @@ aGroupFields = {
 }
 
 aCategoryFields = {
+    'id': {
+        'name': 'id',
+        'type': 'hidden',
+        'field_name': 'id',
+        'value': '',
+    },
     'name': {
         'name': 'Название',
         'type': 'text',
@@ -204,10 +220,29 @@ aCategoryFields = {
 }
 
 aAccountFields = {
+    'title': {
+        'name': 'Заголовок',
+        'type': 'title',
+        'field_name': 'name',
+        'value': '',
+    },
     'id': {
         'name': 'id',
         'type': 'hidden',
         'field_name': 'id',
+        'value': '',
+    },
+    'group': {
+        'name': 'Группа',
+        'type': 'select',
+        'list': [],
+        'value': '',
+    },
+    'category': {
+        'name': 'Категория',
+        'type': 'select',
+        'field_name': 'category',
+        'list': [],
         'value': '',
     },
     'name': {
@@ -255,19 +290,21 @@ aClasses = {
 }
 
 def fnPrepareFormFields(aFields, cCls, sSelID):
-    try:
-        kls = globals()[cCls]
-        oItem = kls.get_by_id(sSelID)
-        oItem = model_to_dict(oItem, recurse=False, backrefs=False)
+    kls = globals()[cCls]
+    oItem = {}
+    if sSelID != "" and int(sSelID) > 0:
+        try:
+            oItem = kls.get_by_id(sSelID)
+            oItem = model_to_dict(oItem, recurse=False, backrefs=False)
+        except:
+            pass
 
-        for sK, oV in aFields.items():
+    for sK, oV in aFields.items():
+        if sK in oItem and oItem[sK]:
+            aFields[sK]['value'] = oItem[oV['field_name']]
+        else:
             aFields[sK]['value'] = ''
-            if oItem[sK]:
-                aFields[sK]['value'] = oItem[sK]
-        return aFields
-    except:
-        pass
-    return {}
+    return aFields
 
 def readfile(sFilePath):
     with zipfile.ZipFile(os.path.dirname(__file__)) as z:
@@ -313,16 +350,31 @@ def index():
             sSelAccount = ''
 
     # NOTE: Группы
-    oGroups = Group.select()
-    aGroups = [{'id':-1,'name':'Все','short':1}]
-    for oI in oGroups:
-        aGroups += [oI]
+    oListAllGroups = Group.select()
+    oListAllCategories = Category.select()
+    aListAllGroups = []
+    aListAllCategories = []
+    for oI in oListAllGroups:
+        aListAllGroups += [oI]
+    for oI in oListAllCategories:
+        aListAllCategories += [oI]
+    aGroups = [{'id':-1,'name':'Все','short':1}] + aListAllGroups
 
     # NOTE: Формы
     print("!!! ", oArgs)
+    if f'cancel' in oArgs:
+        return redirect("/")
     for sName in ['group', 'category', 'account']:
+        if f'accept_remove_{sName}' in oArgs:
+            Klass = globals()[aClasses[sName]]
+            # Klass.delete().where(Klass.id == oArgs[f'select-{sName}']).execute()
+            for sGroupID in oArgsLists[sName]:
+                Klass.delete().where(Klass.id == sGroupID).execute()
+            return redirect("/")
+        if f'remove_{sName}' in oArgs:
+            return render_template(f'{sName}/alert_delete.html', aFields=oArgs)        
         if f'save_{sName}' in oArgs:
-            sKlass = globals()[aClasses[sName]]
+            Klass = globals()[aClasses[sName]]
             aFields = globals()['a'+aClasses[sName]+'Fields']
             oF = {}
             for sK, oV in aFields.items():
@@ -334,14 +386,20 @@ def index():
             if 'id' in oF:
                 sID = oF['id']
                 del oF['id']
-                sKlass.update(oF).where(sKlass.id==sID).execute()
+                Klass.update(oF).where(Klass.id==sID).execute()
             else:
-                sKlass.create(**oF).save()
-            redirect("/")
+                Klass.create(**oF).save()
+            return redirect("/")
         if (f'edit_category' in oArgs) or (f'create_category' in oArgs):
-            aCategoryFields['group']['list'] = aGroups
+            aCategoryFields['group']['list'] = aListAllGroups
             if f'create_category' in oArgs:
                 aCategoryFields['group']['value'] = sSelGroup
+        if (f'edit_account' in oArgs) or (f'create_account' in oArgs):
+            aCategoryFields['group']['list'] = aListAllGroups
+            aCategoryFields['category']['list'] = aListAllCategories
+            if f'create_category' in oArgs:
+                aCategoryFields['group']['value'] = sSelGroup
+                aCategoryFields['category']['value'] = sSelCategory
         if f'create_{sName}' in oArgs:
             dFormsFieldsList = {}
             if sName == 'group':
@@ -360,11 +418,6 @@ def index():
             return render_template(f'{sName}/edit.html',
                 dFormsFieldsList=dFormsFieldsList
             )
-        if f'accept_remove_{sName}' in oArgs:
-
-            redirect("/")
-        if f'remove_{sName}' in oArgs:
-            return render_template(f'{sName}/alert_delete.html')
         if f'clean_{sName}' in oArgs:
             pass
     
@@ -382,6 +435,8 @@ def index():
             aAccounts = Account.select()
         else:
             aAccounts = Account.select().where(Account.category==sSelCategory)
+        aAccountFields['group']['list'] = aListAllGroups
+        aAccountFields['category']['list'] = aListAllCategories
         aAccountFieldsList = fnPrepareFormFields(aAccountFields, 'Account', sSelAccount)
 
     return render_template(

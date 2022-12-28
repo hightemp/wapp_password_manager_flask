@@ -49,6 +49,24 @@
     </div>
 
     <div class="list-group left-panel-list">
+        <div class="input-group tree-item-row">
+            <div class="input-group">
+                <button 
+                    class="btn btn-secondary" 
+                    type="submit" 
+                    value="1" 
+                    name="all-{{sName}}" 
+                ><i class="bi bi-check-square-fill"></i></button>
+            </div>
+            <div class="input-group-text tree-icon">
+
+            </div>
+            <div class="input-group">
+                <input class="form-control" type="text" name="search-{{sName}}" value=""/>
+                <button class="btn btn-secondary" type="button" id="accept-search-{{sName}}"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+
         {% for oItem in aList %}
         {% set sID = oItem[sIndexID] %}
         {% set sTitle = oItem[sIndexTitle] %}
@@ -86,10 +104,27 @@
         <button class="btn btn-secondary" title="" type="submit" name="edit_{{sName}}" value="1"><i class="bi bi-pencil"></i></button>
         <button class="btn btn-danger" title="" type="submit" name="remove_{{sName}}" value="1"><i class="bi bi-trash"></i></button>
         <button class="btn btn-danger" title="" type="submit" name="clean_{{sName}}" value="1"><i class="bi bi-trash-fill"></i></button>
-        <button class="btn btn-secondary" title="Переместить" type="submit" name="move_{{sName}}" value="1"><i class="bi bi-bezier2"></i></button>
     </div>
 
     <div class="list-group left-panel-list">
+        <div class="input-group tree-item-row">
+            <div class="input-group">
+                <button 
+                    class="btn btn-secondary" 
+                    type="submit" 
+                    value="1" 
+                    name="all-{{sName}}" 
+                ><i class="bi bi-check-square-fill"></i></button>
+            </div>
+            <div class="input-group-text tree-icon">
+
+            </div>
+            <div class="input-group">
+                <input class="form-control" type="text" name="search-{{sName}}" value=""/>
+                <button class="btn btn-secondary" type="button" id="accept-search-{{sName}}"><i class="bi bi-search"></i></button>
+            </div>
+        </div>
+
         {% for oItem in aList %}
             {% set sID = oItem[sIndexID] %}
             {% set sTitle = oItem[sIndexTitle] %}
@@ -134,6 +169,8 @@
     {% for sK, oField in aList.items() %}
         {% if oField.type == 'hidden' %}
             <input type="hidden" name="field-{{sName}}-{{ oField.field_name }}" value="{{ oField.value }}">
+        {% elif oField.type == 'title' %}
+            <h2>{{ oField.name }}</h2>
         {% else %}
             <div class="mb-3">
                 <label for="" class="form-label">{{ oField.name }}</label>
