@@ -290,9 +290,15 @@ def index():
         sSelAccount = oArgs['select-account']
     
     # session.update('sSelGroup','sSelAccount')
-    aForCategoryAccounts = Account.select().where(Account.category==sSelCategory,Account.id==sSelAccount)
-    if len(aForCategoryAccounts)==0:
-        sSelAccount = ''
+    print(sSelCategory)
+    if (str(sSelGroup)!="-1"):
+        aForGroupCategories = Category.select().where(Category.group==sSelGroup,Category.id==sSelCategory)
+        if len(aForGroupCategories)==0 and str(sSelCategory)!="-1":
+            sSelCategory = ''
+    if (str(sSelCategory)!="-1"):
+        aForCategoryAccounts = Account.select().where(Account.category==sSelCategory,Account.id==sSelAccount)
+        if len(aForCategoryAccounts)==0 and str(sSelAccount)!="-1":
+            sSelAccount = ''
 
     # NOTE: Формы
     for sName in ['group', 'category', 'account']:
@@ -349,6 +355,7 @@ def index():
     aCategories = fnIterCategories(sSelGroup, aOpenedCategories)
     aCategories.insert(0, {'id':-1,'name':'Все','level':'Все','short':1})
 
+    aAccounts=[]
     aAccountFieldsList = []
     if sSelCategory != '':
         if str(sSelCategory)=="-1":
