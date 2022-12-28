@@ -29,7 +29,7 @@ body, html {
 }
 
 .panel-group .left-panel-list {
-    border-top: 1px solid #eee;
+    /* border-top: 1px solid #eee; */
 }
 
 .panel-tree-category {
@@ -37,7 +37,7 @@ body, html {
 }
 
 .panel-tree-category .left-panel-list {
-    border-top: 1px solid #eee;
+    /* border-top: 1px solid #eee; */
 }
 
 .item-row {

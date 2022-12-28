@@ -395,11 +395,20 @@ def index():
             if f'create_category' in oArgs:
                 aCategoryFields['group']['value'] = sSelGroup
         if (f'edit_account' in oArgs) or (f'create_account' in oArgs):
-            aCategoryFields['group']['list'] = aListAllGroups
-            aCategoryFields['category']['list'] = aListAllCategories
+            aAccountFields['group']['list'] = aListAllGroups
+            aAccountFields['category']['list'] = aListAllCategories
             if f'create_category' in oArgs:
-                aCategoryFields['group']['value'] = sSelGroup
-                aCategoryFields['category']['value'] = sSelCategory
+                aAccountFields['group']['value'] = sSelGroup
+                aAccountFields['category']['value'] = sSelCategory
+            dFormsFieldsList = fnPrepareFormFields(aAccountFields, 'Account', sSelAccount)
+            if (f'edit_account' in oArgs):
+                return render_template(f'{sName}/edit.html',
+                    dFormsFieldsList=dFormsFieldsList
+                )
+            if (f'create_account' in oArgs):
+                return render_template(f'{sName}/create.html',
+                    dFormsFieldsList=dFormsFieldsList
+                )
         if f'create_{sName}' in oArgs:
             dFormsFieldsList = {}
             if sName == 'group':
