@@ -7,6 +7,12 @@
     {{ macros.list_panel(aGroups, sSelGroup, "group") }}
     {% if sSelGroup %}
     {{ macros.tree_panel(aCategories, sSelCategory, "category", aOpenedCategories) }}
+        {% if sSelCategory %}
+            {{ macros.list_panel(aAccounts, sSelAccount, "account") }}
+            {% if sSelAccount %}
+            {{ macros.form_text_fields(aAccountFieldsList,"account") }}
+            {% endif %}
+        {% endif %}
     {% endif %}
 </div>
 

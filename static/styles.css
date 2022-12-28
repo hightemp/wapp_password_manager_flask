@@ -21,7 +21,7 @@ body, html {
     right: 0px;
     bottom: 0px;
     display: grid;
-    grid-template-columns: 200px 400px 1fr;
+    grid-template-columns: 200px 300px 300px 1fr;
 }
 
 .panel-group {
@@ -62,4 +62,34 @@ body, html {
 .tree-spacer {
     display: inline-block;
     width: 10px;
+}
+
+.message-box-wrapper {
+    position:absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.message-box {
+    width: 400px;
+}
+
+.form-text-fields-account {
+    padding: 10px;
+}
+
+.row-with-button {
+    display: grid;
+    grid-template-columns: 1fr 30px;
+}
+
+.list-group-item {
+    min-height: 32px;
 }

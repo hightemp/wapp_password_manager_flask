@@ -84,21 +84,13 @@ if (bFirstStart):
     category02 = Category.create(name="yandex", group=group03)
     category03 = Category.create(name="yandex", group=group04)
 
-    account01 = Account.create(
-        name="google", 
-        category=category01, 
-        a_username="testlogin 1",
-        a_password="password",
-        a_desc="TEST!"
-    )
-    account02 = Account.create(
-        name="google", 
-        category=category01, 
-        a_username="testlogin 2",
-        a_password="password",
-        a_desc="TEST!"
-    )
+    account01 = Account.create(name="google 1", category=category01, a_username="testlogin 1",a_password="password",a_desc="TEST!")
+    account02 = Account.create(name="google 2", category=category01, a_username="testlogin 2",a_password="password",a_desc="TEST!")
 
+    account03 = Account.create(name="ya 1", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
+    account04 = Account.create(name="ya 2", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
+    account05 = Account.create(name="ya 3", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
+    account06 = Account.create(name="ya 4", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
 
 # NOTE: Хелперы
 def parse_get(args):
@@ -155,21 +147,26 @@ def parse_multi_form(form):
 
 def fnIterCategories(iGroupID, aOpened, aCategories=[], iLevel=0):
     if (iLevel==0):
-        aQueryCategories = Category.select().where(Category.parent == None, Category.group == iGroupID)
+        aQueryCategories = []
+        if str(iGroupID)=="-1":
+            aQueryCategories = Category.select().where(Category.parent == None)
+        else: 
+            aQueryCategories = Category.select().where(Category.parent == None, Category.group == iGroupID)
         return fnIterCategories(iGroupID, aOpened, aQueryCategories, 1)
     else:
         aNewCategories = []
         for oCategory in aCategories:
             sID = oCategory.id
-            aQueryCategories = Category.select().where(Category.parent == sID, Category.group == iGroupID)
-            print(aQueryCategories)
-            
+            if str(iGroupID)=="-1":
+                aQueryCategories = Category.select().where(Category.parent == sID)
+            else: 
+                aQueryCategories = Category.select().where(Category.parent == sID, Category.group == iGroupID)
+
             aIterCategories = []
             if (sID in aOpened) and aQueryCategories and len(aQueryCategories)>0:
                 aIterCategories = fnIterCategories(iGroupID, aOpened, aQueryCategories, iLevel+1)
             
             iCnt = Account.select().where(Account.category == sID).count()
-            # oNewCategory = model_to_dict(oCategory, recurse=False, backrefs=False, exclude=['group','parent'])
 
             oNewCategory = {}
             oNewCategory['id'] = oCategory.id
@@ -179,8 +176,85 @@ def fnIterCategories(iGroupID, aOpened, aCategories=[], iLevel=0):
 
             aNewCategories += [oNewCategory] + aIterCategories
         
-        print(">>", aNewCategories)
         return aNewCategories
+
+aAccountFields = {
+    'id': {
+        'name': 'id',
+        'type': 'hidden',
+        'field_name': 'id',
+        'value': '',
+    },
+    'name': {
+        'name': 'Название',
+        'type': 'text',
+        'field_name': 'name',
+        'value': '',
+    },
+    'a_username': {
+        'name': 'Логин',
+        'type': 'text',
+        'field_name': 'a_username',
+        'value': '',
+    },
+    'a_password': {
+        'name': 'Пароль',
+        'type': 'text',
+        'field_name': 'a_password',
+        'value': '',
+    },
+    'a_token': {
+        'name': 'Токен',
+        'type': 'text',
+        'field_name': 'a_token',
+        'value': '',
+    },
+    'a_url': {
+        'name': 'url',
+        'type': 'url',
+        'field_name': 'a_url',
+        'value': '',
+    },
+    'a_desc': {
+        'name': 'Описание',
+        'type': 'textarea',
+        'field_name': 'a_desc',
+        'value': '',
+    },
+}
+
+aGroupFields = {
+    'name': {
+        'name': 'Название',
+        'type': 'text',
+        'field_name': 'name',
+        'value': '',
+    },
+}
+
+aCategoryFields = {
+    'name': {
+        'name': 'Название',
+        'type': 'text',
+        'field_name': 'name',
+        'value': '',
+    },
+}
+
+def fnPrepareFormFields(aFields, cCls, sSelID):
+    try:
+        kls = globals()[cCls]
+        oItem = kls.get_by_id(sSelID)
+        oItem = model_to_dict(oItem, recurse=False, backrefs=False)
+
+        for sK, oV in aFields.items():
+            if oItem[sK]:
+                aFields[sK]['value'] = oItem[sK]
+
+        return aFields
+    except:
+        pass
+    return {}
 
 def readfile(sFilePath):
     with zipfile.ZipFile(os.path.dirname(__file__)) as z:
@@ -215,19 +289,83 @@ def index():
     if 'select-account' in oArgs:
         sSelAccount = oArgs['select-account']
     
+    # session.update('sSelGroup','sSelAccount')
+    aForCategoryAccounts = Account.select().where(Account.category==sSelCategory,Account.id==sSelAccount)
+    if len(aForCategoryAccounts)==0:
+        sSelAccount = ''
+
+    # NOTE: Формы
+    for sName in ['group', 'category', 'account']:
+        if f'save_{sName}' in oArgs:
+            oF = {}
+            for sK in aAccountFields.items():
+                sFK = 'field-'+sName+'-'+sK
+                oF[sK] = oArgs[sFK]
+            if oF['id']:
+                sID = oF['id']
+                del oF['id']
+                oAccount = Account.update(oF).where(Account.id==sID)
+                oAccount.save()
+            else:
+                oAccount = Account.create(oF)
+                oAccount.save()
+            redirect("/")
+        if f'create_{sName}' in oArgs:
+            dFormsFieldsList = {}
+            if sName == 'group':
+                dFormsFieldsList = aGroupFields
+            if sName == 'category':
+                dFormsFieldsList = aCategoryFields
+            return render_template(f'{sName}/create.html',
+                dFormsFieldsList=dFormsFieldsList
+            )
+        if f'edit_{sName}' in oArgs:
+            dFormsFieldsList = {}
+            if sName == 'group':
+                dFormsFieldsList = fnPrepareFormFields(aGroupFields, 'Group', sSelGroup)
+            if sName == 'category':
+                dFormsFieldsList = fnPrepareFormFields(aCategoryFields, 'Category', sSelCategory)
+            return render_template(f'{sName}/edit.html',
+                dFormsFieldsList=dFormsFieldsList
+            )
+        if f'accept_remove_{sName}' in oArgs:
+
+            redirect("/")
+        if f'remove_{sName}' in oArgs:
+            return render_template(f'{sName}/alert_delete.html')
+        if f'clean_{sName}' in oArgs:
+            pass
+    
     aOpenedCategories = []
     if 'category' in oArgsLists:
         aOpenedCategories = oArgsLists["category"]
     
     # oGroup = Group.get_by_id(sSelGroup)
-    aGroups = Group.select()
-    aCategories = fnIterCategories(sSelGroup, aOpenedCategories)
+    oGroups = Group.select()
+    aGroups = [{'id':-1,'name':'Все','short':1}]
+    for oI in oGroups:
+        aGroups += [oI]
 
-    return render_template('index.html', 
+    aCategories = fnIterCategories(sSelGroup, aOpenedCategories)
+    aCategories.insert(0, {'id':-1,'name':'Все','level':'Все','short':1})
+
+    aAccountFieldsList = []
+    if sSelCategory != '':
+        if str(sSelCategory)=="-1":
+            aAccounts = Account.select()
+        else:
+            aAccounts = Account.select().where(Account.category==sSelCategory)
+        aAccountFieldsList = fnPrepareFormFields(aAccountFields, 'Account', sSelAccount)
+
+    return render_template(
+        'index.html', 
         sBaseURL=sBaseURL,
         sSelGroup=sSelGroup,
         sSelCategory=sSelCategory,
+        sSelAccount=sSelAccount,
         aGroups=aGroups,
         aCategories=aCategories,
-        aOpenedCategories=aOpenedCategories
+        aAccounts=aAccounts,
+        aOpenedCategories=aOpenedCategories,
+        aAccountFieldsList=aAccountFieldsList
     )

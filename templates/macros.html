@@ -36,7 +36,7 @@
 </select>
 {%- endmacro %}
 
-{% macro list_panel(aList, sSelItemID, sName, iIndexID='id', iIndexTitle='name') -%}
+{% macro list_panel(aList, sSelItemID, sName, sIndexID='id', sIndexTitle='name', sIndexShort='short') -%}
 <div class="list-panel panel-{{sName}}">
     <input type="hidden" name="select-{{sName}}" value="{{sSelItemID}}">
 
@@ -50,11 +50,13 @@
 
     <div class="list-group left-panel-list">
         {% for oItem in aList %}
-        {% set sID = oItem[iIndexID] %}
-        {% set sTitle = oItem[iIndexTitle] %}
+        {% set sID = oItem[sIndexID] %}
+        {% set sTitle = oItem[sIndexTitle] %}
             <div class="input-group item-row">
                 <div class="input-group-text">
-                    <input class="form-check-input mt-0" type="checkbox" value="{{sID}}" name="{{sName}}[{{sID}}]" />
+                    {% if not oItem[sIndexShort] %}
+                        <input class="form-check-input mt-0" type="checkbox" value="{{sID}}" name="{{sName}}[{{sID}}]" />
+                    {% endif %}
                 </div>
                 <button
                     class="list-group-item list-group-item-action {{ 'active' if sID|string == sSelItemID|string }} " 
@@ -70,7 +72,7 @@
 </div>
 {%- endmacro %}
 
-{% macro tree_panel(aList, sSelItemID, sName, aOpened, iIndexID='id', iIndexTitle='name', iIndexLevel='level') -%}
+{% macro tree_panel(aList, sSelItemID, sName, aOpened, sIndexID='id', sIndexTitle='name', sIndexLevel='level', sIndexShort='short') -%}
 <div class="tree-panel panel-tree-{{sName}}">
     <input type="hidden" name="select-{{sName}}" value="{{sSelItemID}}">
 
@@ -79,6 +81,7 @@
     {% endfor %}
 
     <div class="btn-group w100">
+        <button class="btn btn-primary" type="submit" name="reload" value="1"><i class="bi bi-arrow-repeat"></i></button>
         <button class="btn btn-success" title="" type="submit" name="create_{{sName}}" value="1"><i class="bi bi-file-plus"></i></button>
         <button class="btn btn-secondary" title="" type="submit" name="edit_{{sName}}" value="1"><i class="bi bi-pencil"></i></button>
         <button class="btn btn-danger" title="" type="submit" name="remove_{{sName}}" value="1"><i class="bi bi-trash"></i></button>
@@ -88,18 +91,22 @@
 
     <div class="list-group left-panel-list">
         {% for oItem in aList %}
-        {% set sID = oItem[iIndexID] %}
-        {% set sTitle = oItem[iIndexTitle] %}
-        {% set sLevel = oItem[iIndexLevel] %}
+            {% set sID = oItem[sIndexID] %}
+            {% set sTitle = oItem[sIndexTitle] %}
+            {% set sLevel = oItem[sIndexLevel] %}
             <div class="input-group tree-item-row">
                 <div class="input-group-text">
-                    <input class="form-check-input mt-0" type="checkbox" value="{{sID}}" name="{{sName}}[{{sID}}]" />
+                    {% if not oItem[sIndexShort] %}
+                        <input class="form-check-input mt-0" type="checkbox" value="{{sID}}" name="{{sName}}[{{sID}}]" />
+                    {% endif %}
                 </div>
                 <div class="input-group-text tree-icon">
-                    {% if aOpened[sID]|string == sID|string %}
-                        <button class="btn btn-light" type="submit" name="{{sName}}[{{sID}}]" value=""><i class="bi bi-dash-square"></i></button>
-                    {% else %}
-                        <button class="btn btn-light" type="submit" name="{{sName}}[{{sID}}]" value="{{sID}}"><i class="bi bi-plus-square"></i></button>
+                    {% if not oItem[sIndexShort] %}
+                        {% if aOpened[sID]|string == sID|string %}
+                            <button class="btn btn-light" type="submit" name="{{sName}}[{{sID}}]" value=""><i class="bi bi-dash-square"></i></button>
+                        {% else %}
+                            <button class="btn btn-light" type="submit" name="{{sName}}[{{sID}}]" value="{{sID}}"><i class="bi bi-plus-square"></i></button>
+                        {% endif %}
                     {% endif %}
                 </div>
                 <button 
@@ -114,4 +121,36 @@
         {% endfor %}
     </div>
 </div>
+{%- endmacro %}
+
+{% macro form_text_fields(aList, sName) -%}
+<div class="form-text-fields-panel form-text-fields-{{sName}}">
+    {% for sK, oField in aList.items() %}
+        {% if oField.type == 'hidden' %}
+            <input type="hidden" name="{{ oField.field_name }}" value="{{ oField.value }}">
+        {% else %}
+            <div class="mb-3">
+                <label for="" class="form-label">{{ oField.name }}</label>
+                {% if oField.type == 'text' %}
+                <input type="text" class="form-control" name="{{ oField.field_name }}" value="{{ oField.value }}">
+                {% elif oField.type == 'url' %}
+                <div class="row-with-button">
+                    <input type="text" class="form-control" name="{{ oField.field_name }}" value="{{ oField.value }}">
+                    <a class="btn btn-primary" target="_blank" href="{{ oField.value }}" role="button"><i class="bi bi-box-arrow-in-up-right"></i></a>
+                </div>
+                {% elif oField.type == 'textarea' %}
+                <textarea class="form-control"  name="field-{{sName}}-{{ oField.field_name }}" rows="5">{{ oField.value }}</textarea>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    <button type="submit" class="btn btn-success" name="save-{{sName}}" vale="1">Save</button>
+</div>
+{%- endmacro %}
+
+{% macro form_hidden_fields(aList, sName) -%}
+{% for sK, sV in aList.items() %}
+<input type="hidden" name="{{sK}}" value="{{sV}}">
+{% endfor %}
 {%- endmacro %}
