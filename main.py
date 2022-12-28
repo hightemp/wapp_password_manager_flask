@@ -87,10 +87,10 @@ if (bFirstStart):
     account01 = Account.create(name="google 1", category=category01, a_username="testlogin 1",a_password="password",a_desc="TEST!")
     account02 = Account.create(name="google 2", category=category01, a_username="testlogin 2",a_password="password",a_desc="TEST!")
 
-    account03 = Account.create(name="ya 1", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
-    account04 = Account.create(name="ya 2", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
-    account05 = Account.create(name="ya 3", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
-    account06 = Account.create(name="ya 4", category=category02, a_username="testlogin 1",a_password="password",a_desc="TEST!")
+    account03 = Account.create(name="ya 1", category=category02, a_username="testlogin 3",a_password="password",a_desc="TEST!")
+    account04 = Account.create(name="ya 2", category=category02, a_username="testlogin 4",a_password="password",a_desc="TEST!")
+    account05 = Account.create(name="ya 3", category=category02, a_username="testlogin 5",a_password="password",a_desc="TEST!")
+    account06 = Account.create(name="ya 4", category=category02, a_username="testlogin 6",a_password="password",a_desc="TEST!")
 
 # NOTE: Хелперы
 def parse_get(args):
@@ -248,9 +248,9 @@ def fnPrepareFormFields(aFields, cCls, sSelID):
         oItem = model_to_dict(oItem, recurse=False, backrefs=False)
 
         for sK, oV in aFields.items():
+            aFields[sK]['value'] = ''
             if oItem[sK]:
                 aFields[sK]['value'] = oItem[sK]
-
         return aFields
     except:
         pass
@@ -290,7 +290,6 @@ def index():
         sSelAccount = oArgs['select-account']
     
     # session.update('sSelGroup','sSelAccount')
-    print(sSelCategory)
     if (str(sSelGroup)!="-1"):
         aForGroupCategories = Category.select().where(Category.group==sSelGroup,Category.id==sSelCategory)
         if len(aForGroupCategories)==0 and str(sSelCategory)!="-1":
@@ -301,20 +300,22 @@ def index():
             sSelAccount = ''
 
     # NOTE: Формы
+    print("!!! ", oArgs)
     for sName in ['group', 'category', 'account']:
         if f'save_{sName}' in oArgs:
             oF = {}
-            for sK in aAccountFields.items():
-                sFK = 'field-'+sName+'-'+sK
-                oF[sK] = oArgs[sFK]
+            for sK, oV in aAccountFields.items():
+                sFK = 'field-'+str(sName)+'-'+str(sK)
+                try:
+                    oF[sK] = oArgs[sFK]
+                except:
+                    pass
             if oF['id']:
                 sID = oF['id']
                 del oF['id']
-                oAccount = Account.update(oF).where(Account.id==sID)
-                oAccount.save()
+                Account.update(oF).where(Account.id==sID).execute()
             else:
-                oAccount = Account.create(oF)
-                oAccount.save()
+                Account.create(oF).save()
             redirect("/")
         if f'create_{sName}' in oArgs:
             dFormsFieldsList = {}

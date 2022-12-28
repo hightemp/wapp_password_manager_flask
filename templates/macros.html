@@ -72,7 +72,7 @@
 </div>
 {%- endmacro %}
 
-{% macro tree_panel(aList, sSelItemID, sName, aOpened, sIndexID='id', sIndexTitle='name', sIndexLevel='level', sIndexShort='short') -%}
+{% macro tree_panel(aList, sSelItemID, sName, aOpened, sIndexID='id', sIndexTitle='name', sIndexLevel='level', sIndexShort='short', sIndexCount='cnt') -%}
 <div class="tree-panel panel-tree-{{sName}}">
     <input type="hidden" name="select-{{sName}}" value="{{sSelItemID}}">
 
@@ -94,6 +94,7 @@
             {% set sID = oItem[sIndexID] %}
             {% set sTitle = oItem[sIndexTitle] %}
             {% set sLevel = oItem[sIndexLevel] %}
+            {% set sCnt = oItem[sIndexCount] %}
             <div class="input-group tree-item-row">
                 <div class="input-group-text">
                     {% if not oItem[sIndexShort] %}
@@ -116,6 +117,9 @@
                     value="{{ sID }}"
                 >
                     {{ sLevel|safe }}
+                    {% if sCnt %}
+                    <span class="badge bg-primary rounded-pill">{{sCnt}}</span>
+                    {% endif %}
                 </button>
             </div>
         {% endfor %}
@@ -127,15 +131,15 @@
 <div class="form-text-fields-panel form-text-fields-{{sName}}">
     {% for sK, oField in aList.items() %}
         {% if oField.type == 'hidden' %}
-            <input type="hidden" name="{{ oField.field_name }}" value="{{ oField.value }}">
+            <input type="hidden" name="field-{{sName}}-{{ oField.field_name }}" value="{{ oField.value }}">
         {% else %}
             <div class="mb-3">
                 <label for="" class="form-label">{{ oField.name }}</label>
                 {% if oField.type == 'text' %}
-                <input type="text" class="form-control" name="{{ oField.field_name }}" value="{{ oField.value }}">
+                <input type="text" class="form-control" name="field-{{sName}}-{{ oField.field_name }}" value="{{ oField.value }}">
                 {% elif oField.type == 'url' %}
                 <div class="row-with-button">
-                    <input type="text" class="form-control" name="{{ oField.field_name }}" value="{{ oField.value }}">
+                    <input type="text" class="form-control" name="field-{{sName}}-{{ oField.field_name }}" value="{{ oField.value }}">
                     <a class="btn btn-primary" target="_blank" href="{{ oField.value }}" role="button"><i class="bi bi-box-arrow-in-up-right"></i></a>
                 </div>
                 {% elif oField.type == 'textarea' %}
@@ -145,7 +149,7 @@
         {% endif %}
     {% endfor %}
 
-    <button type="submit" class="btn btn-success" name="save-{{sName}}" vale="1">Save</button>
+    <button type="submit" class="btn btn-success" name="save_{{sName}}" value="1">Сохранить</button>
 </div>
 {%- endmacro %}
 

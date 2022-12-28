@@ -21,7 +21,7 @@ body, html {
     right: 0px;
     bottom: 0px;
     display: grid;
-    grid-template-columns: 200px 300px 300px 1fr;
+    grid-template-columns: 300px 300px 300px 1fr;
 }
 
 .panel-group {
@@ -92,4 +92,10 @@ body, html {
 
 .list-group-item {
     min-height: 32px;
+    display: grid;
+    grid-template-columns: 1fr 30px;
+}
+
+.active .bg-primary {
+    background: rgba(255, 255, 255, 0.3) !important;
 }
