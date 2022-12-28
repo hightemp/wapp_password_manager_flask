@@ -116,9 +116,11 @@
                     name="select-{{sName}}" 
                     value="{{ sID }}"
                 >
-                    {{ sLevel|safe }}
+                    <span>{{ sLevel|safe }}</span>
                     {% if sCnt %}
                     <span class="badge bg-primary rounded-pill">{{sCnt}}</span>
+                    {% else %}
+                    <span>&nbsp;</span>
                     {% endif %}
                 </button>
             </div>

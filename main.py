@@ -241,6 +241,12 @@ aCategoryFields = {
     },
 }
 
+aClasses = {
+    'group': 'Group',
+    'category': 'Category',
+    'account': 'Account',
+}
+
 def fnPrepareFormFields(aFields, cCls, sSelID):
     try:
         kls = globals()[cCls]
@@ -303,19 +309,21 @@ def index():
     print("!!! ", oArgs)
     for sName in ['group', 'category', 'account']:
         if f'save_{sName}' in oArgs:
+            sKlass = globals()[aClasses[sName]]
+            aFields = globals()['a'+aClasses[sName]+'Fields']
             oF = {}
-            for sK, oV in aAccountFields.items():
+            for sK, oV in aFields.items():
                 sFK = 'field-'+str(sName)+'-'+str(sK)
                 try:
                     oF[sK] = oArgs[sFK]
                 except:
                     pass
-            if oF['id']:
+            if 'id' in oF:
                 sID = oF['id']
                 del oF['id']
-                Account.update(oF).where(Account.id==sID).execute()
+                sKlass.update(oF).where(sKlass.id==sID).execute()
             else:
-                Account.create(oF).save()
+                sKlass.create(**oF).save()
             redirect("/")
         if f'create_{sName}' in oArgs:
             dFormsFieldsList = {}
