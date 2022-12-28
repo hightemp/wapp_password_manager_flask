@@ -208,7 +208,7 @@
 </div>
 {%- endmacro %}
 
-{% macro form_hidden_fields(aList, sName) -%}
+{% macro form_hidden_fields(aList) -%}
 {% for sK, sV in aList.items() %}
 <input type="hidden" name="{{sK}}" value="{{sV}}">
 {% endfor %}

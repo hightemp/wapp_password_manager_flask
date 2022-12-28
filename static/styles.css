@@ -40,6 +40,10 @@ body, html {
     /* border-top: 1px solid #eee; */
 }
 
+.panel-account {
+    border-right: 1px solid #eee;
+}
+
 .item-row {
     display: grid;
     grid-template-columns: 30px 1fr;

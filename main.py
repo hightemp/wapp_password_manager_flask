@@ -389,7 +389,8 @@ def index():
                 Klass.update(oF).where(Klass.id==sID).execute()
             else:
                 Klass.create(**oF).save()
-            return redirect("/")
+            break;
+            # return redirect("/")
         if (f'edit_category' in oArgs) or (f'create_category' in oArgs):
             aCategoryFields['group']['list'] = aListAllGroups
             if f'create_category' in oArgs:
@@ -416,6 +417,7 @@ def index():
             if sName == 'category':
                 dFormsFieldsList = aCategoryFields
             return render_template(f'{sName}/create.html',
+                oArgs=oArgs,
                 dFormsFieldsList=dFormsFieldsList
             )
         if f'edit_{sName}' in oArgs:
@@ -425,6 +427,7 @@ def index():
             if sName == 'category':
                 dFormsFieldsList = fnPrepareFormFields(aCategoryFields, 'Category', sSelCategory)
             return render_template(f'{sName}/edit.html',
+                oArgs=oArgs,
                 dFormsFieldsList=dFormsFieldsList
             )
         if f'clean_{sName}' in oArgs:
