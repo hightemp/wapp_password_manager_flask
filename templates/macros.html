@@ -146,6 +146,12 @@
                 </div>
                 {% elif oField.type == 'textarea' %}
                 <textarea class="form-control"  name="field-{{sName}}-{{ oField.field_name }}" rows="5">{{ oField.value }}</textarea>
+                {% elif oField.type == 'select' %}
+                <select class="form-control" name="field-{{sName}}-{{ oField.field_name }}">
+                    {% for oI in oField.list %}
+                        <option value="{{ oI.id }}" {{ 'selected' if oField.value|string == oI.id|string }}>{{ oI.name }}</option>
+                    {% endfor %}
+                </select>
                 {% endif %}
             </div>
         {% endif %}

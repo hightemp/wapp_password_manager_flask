@@ -178,6 +178,31 @@ def fnIterCategories(iGroupID, aOpened, aCategories=[], iLevel=0):
         
         return aNewCategories
 
+aGroupFields = {
+    'name': {
+        'name': 'Название',
+        'type': 'text',
+        'field_name': 'name',
+        'value': '',
+    },
+}
+
+aCategoryFields = {
+    'name': {
+        'name': 'Название',
+        'type': 'text',
+        'field_name': 'name',
+        'value': '',
+    },
+    'group': {
+        'name': 'Группа',
+        'type': 'select',
+        'field_name': 'group',
+        'list': [],
+        'value': '',
+    },
+}
+
 aAccountFields = {
     'id': {
         'name': 'id',
@@ -219,24 +244,6 @@ aAccountFields = {
         'name': 'Описание',
         'type': 'textarea',
         'field_name': 'a_desc',
-        'value': '',
-    },
-}
-
-aGroupFields = {
-    'name': {
-        'name': 'Название',
-        'type': 'text',
-        'field_name': 'name',
-        'value': '',
-    },
-}
-
-aCategoryFields = {
-    'name': {
-        'name': 'Название',
-        'type': 'text',
-        'field_name': 'name',
         'value': '',
     },
 }
@@ -305,6 +312,12 @@ def index():
         if len(aForCategoryAccounts)==0 and str(sSelAccount)!="-1":
             sSelAccount = ''
 
+    # NOTE: Группы
+    oGroups = Group.select()
+    aGroups = [{'id':-1,'name':'Все','short':1}]
+    for oI in oGroups:
+        aGroups += [oI]
+
     # NOTE: Формы
     print("!!! ", oArgs)
     for sName in ['group', 'category', 'account']:
@@ -325,6 +338,10 @@ def index():
             else:
                 sKlass.create(**oF).save()
             redirect("/")
+        if (f'edit_category' in oArgs) or (f'create_category' in oArgs):
+            aCategoryFields['group']['list'] = aGroups
+            if f'create_category' in oArgs:
+                aCategoryFields['group']['value'] = sSelGroup
         if f'create_{sName}' in oArgs:
             dFormsFieldsList = {}
             if sName == 'group':
@@ -355,12 +372,6 @@ def index():
     if 'category' in oArgsLists:
         aOpenedCategories = oArgsLists["category"]
     
-    # oGroup = Group.get_by_id(sSelGroup)
-    oGroups = Group.select()
-    aGroups = [{'id':-1,'name':'Все','short':1}]
-    for oI in oGroups:
-        aGroups += [oI]
-
     aCategories = fnIterCategories(sSelGroup, aOpenedCategories)
     aCategories.insert(0, {'id':-1,'name':'Все','level':'Все','short':1})
 
