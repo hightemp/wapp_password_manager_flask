@@ -36,7 +36,7 @@
 </select>
 {%- endmacro %}
 
-{% macro list_panel(aList, sSelItemID, sName, sIndexID='id', sIndexTitle='name', sIndexShort='short') -%}
+{% macro list_panel(aList, sSelItemID, sName, sFilter, sIndexID='id', sIndexTitle='name', sIndexShort='short') -%}
 <div class="list-panel panel-{{sName}}">
     <input type="hidden" name="select-{{sName}}" value="{{sSelItemID}}">
 
@@ -63,11 +63,11 @@
                     class="btn btn-secondary" 
                     type="submit" 
                     value="1" 
-                    name="all-{{sName}}" 
+                    name="search-clean-{{sName}}" 
                 ><i class="bi bi-x-square"></i></button>
             </div>
             <div class="input-group">
-                <input class="form-control" type="text" name="search-{{sName}}" value=""/>
+                <input class="form-control" type="text" name="search-{{sName}}" value="{{sFilter}}"/>
                 <button class="btn btn-secondary" type="button" id="accept-search-{{sName}}"><i class="bi bi-search"></i></button>
             </div>
         </div>
@@ -95,7 +95,7 @@
 </div>
 {%- endmacro %}
 
-{% macro tree_panel(aList, sSelItemID, sName, aOpened, sIndexID='id', sIndexTitle='name', sIndexLevel='level', sIndexShort='short', sIndexCount='cnt') -%}
+{% macro tree_panel(aList, sSelItemID, sName, aOpened, sFilter, sIndexID='id', sIndexTitle='name', sIndexLevel='level', sIndexShort='short', sIndexCount='cnt') -%}
 <div class="tree-panel panel-tree-{{sName}}">
     <input type="hidden" name="select-{{sName}}" value="{{sSelItemID}}">
 
@@ -126,12 +126,12 @@
                     class="btn btn-secondary" 
                     type="submit" 
                     value="1" 
-                    name="all-{{sName}}" 
+                    name="search-clean-{{sName}}" 
                 ><i class="bi bi-x-square"></i></button>
             </div>
             <div class="input-group">
-                <input class="form-control" type="text" name="search-{{sName}}" value=""/>
-                <button class="btn btn-secondary" type="button" id="accept-search-{{sName}}"><i class="bi bi-search"></i></button>
+                <input class="form-control" type="text" name="search-{{sName}}" value="{{sFilter}}"/>
+                <button class="btn btn-secondary" type="submit" id="accept-search-{{sName}}" value="1"><i class="bi bi-search"></i></button>
             </div>
         </div>
 

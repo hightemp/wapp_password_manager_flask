@@ -1,18 +1,9 @@
 from flask import g, Flask, render_template, request, send_file, redirect, session, jsonify
 import os
 import re
-import sqlite3
-import glob
-import re
-import base64
-import html
-import requests
-import uuid
 from werkzeug.utils import secure_filename
 
 from flask import Response
-import importlib.resources
-import jinja2
 from jinja2 import Template, FunctionLoader, Environment, BaseLoader
 from flask import Flask
 import mimetypes
@@ -24,7 +15,7 @@ import zipfile
 # NOTE: Константы
 UPLOAD_PATH_REL = "static/uploads"
 UPLOAD_PATH = os.path.join(os.path.dirname(__file__), UPLOAD_PATH_REL)
-DATABASE = './database.db'
+DATABASE = './wapp_password_manager_flask.database.db'
 
 # NOTE: Переменные
 bFirstStart = not os.path.isfile(DATABASE)
@@ -145,26 +136,44 @@ def parse_multi_form(form):
 
     return data
 
-def fnIterCategories(iGroupID, aOpened, aCategories=[], iLevel=0):
+def fnIterCategories(iGroupID, aOpened, sCategoryFilter, aCategories=[], iLevel=0):
     if (iLevel==0):
         aQueryCategories = []
-        if str(iGroupID)=="-1":
-            aQueryCategories = Category.select().where(Category.parent == None)
-        else: 
-            aQueryCategories = Category.select().where(Category.parent == None, Category.group == iGroupID)
-        return fnIterCategories(iGroupID, aOpened, aQueryCategories, 1)
+
+        if sCategoryFilter!='':
+            if str(iGroupID)=="-1":
+                aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == None)
+            else: 
+                aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == None, Category.group == iGroupID)
+        else:
+            if str(iGroupID)=="-1":
+                aQueryCategories = Category.select().where(Category.parent == None)
+            else: 
+                aQueryCategories = Category.select().where(Category.parent == None, Category.group == iGroupID)
+
+        return fnIterCategories(iGroupID, aOpened, sCategoryFilter, aQueryCategories, 1)
     else:
         aNewCategories = []
         for oCategory in aCategories:
             sID = oCategory.id
-            if str(iGroupID)=="-1":
-                aQueryCategories = Category.select().where(Category.parent == sID)
-            else: 
-                aQueryCategories = Category.select().where(Category.parent == sID, Category.group == iGroupID)
+
+            if sCategoryFilter!='':
+                if str(iGroupID)=="-1":
+                    aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == sID)
+                else: 
+                    aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == sID, Category.group == iGroupID)
+            else:
+                if str(iGroupID)=="-1":
+                    aQueryCategories = Category.select().where(Category.parent == sID)
+                else: 
+                    aQueryCategories = Category.select().where(Category.parent == sID, Category.group == iGroupID)
+
+            if sCategoryFilter!='':
+                aQueryCategories.where(Category.name % sCategoryFilter)
 
             aIterCategories = []
             if (sID in aOpened) and aQueryCategories and len(aQueryCategories)>0:
-                aIterCategories = fnIterCategories(iGroupID, aOpened, aQueryCategories, iLevel+1)
+                aIterCategories = fnIterCategories(iGroupID, aOpened, sCategoryFilter, aQueryCategories, iLevel+1)
             
             iCnt = Account.select().where(Account.category == sID).count()
 
@@ -289,6 +298,10 @@ aClasses = {
     'account': 'Account',
 }
 
+sGroupFilter = ''
+sCategoryFilter = ''
+sAccountFilter = ''
+
 def fnPrepareFormFields(aFields, cCls, sSelID):
     kls = globals()[cCls]
     oItem = {}
@@ -365,6 +378,11 @@ def index():
     if f'cancel' in oArgs:
         return redirect("/")
     for sName in ['group', 'category', 'account']:
+        if f'search-clean-{sName}' in oArgs:
+            oArgs[f'search-{sName}'] = ''
+            globals()['s'+aClasses[sName]+'Filter'] = ''
+        if f'search-{sName}' in oArgs:
+            globals()['s'+aClasses[sName]+'Filter'] = oArgs[f'search-{sName}']
         if f'accept_remove_{sName}' in oArgs:
             Klass = globals()[aClasses[sName]]
             # Klass.delete().where(Klass.id == oArgs[f'select-{sName}']).execute()
@@ -437,7 +455,7 @@ def index():
     if 'category' in oArgsLists:
         aOpenedCategories = oArgsLists["category"]
     
-    aCategories = fnIterCategories(sSelGroup, aOpenedCategories)
+    aCategories = fnIterCategories(sSelGroup, aOpenedCategories, sCategoryFilter)
     aCategories.insert(0, {'id':-1,'name':'Все','level':'Все','short':1})
 
     aAccounts=[]
@@ -461,5 +479,8 @@ def index():
         aCategories=aCategories,
         aAccounts=aAccounts,
         aOpenedCategories=aOpenedCategories,
-        aAccountFieldsList=aAccountFieldsList
+        aAccountFieldsList=aAccountFieldsList,
+        sGroupFilter=sGroupFilter,
+        sCategoryFilter=sCategoryFilter,
+        sAccountFilter=sAccountFilter
     )
