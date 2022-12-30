@@ -313,10 +313,13 @@ def fnPrepareFormFields(aFields, cCls, sSelID):
             pass
 
     for sK, oV in aFields.items():
-        if sK in oItem and oItem[sK]:
-            aFields[sK]['value'] = oItem[oV['field_name']]
-        else:
+        if sSelID==0:
             aFields[sK]['value'] = ''
+        else:
+            if sK in oItem and oItem[sK]:
+                aFields[sK]['value'] = oItem[oV['field_name']]
+            else:
+                aFields[sK]['value'] = ''
     return aFields
 
 def readfile(sFilePath):
@@ -388,7 +391,8 @@ def index():
             # Klass.delete().where(Klass.id == oArgs[f'select-{sName}']).execute()
             for sGroupID in oArgsLists[sName]:
                 Klass.delete().where(Klass.id == sGroupID).execute()
-            return redirect("/")
+            del oArgs[f'accept_remove_{sName}']
+            break;
         if f'remove_{sName}' in oArgs:
             return render_template(f'{sName}/alert_delete.html', aFields=oArgs)        
         if f'save_{sName}' in oArgs:
@@ -407,33 +411,42 @@ def index():
                 Klass.update(oF).where(Klass.id==sID).execute()
             else:
                 Klass.create(**oF).save()
+            del oArgs[f'save_{sName}']
             break;
             # return redirect("/")
-        if (f'edit_category' in oArgs) or (f'create_category' in oArgs):
+        if (sName=='category') and ((f'edit_category' in oArgs) or (f'create_category' in oArgs)):
             aCategoryFields['group']['list'] = aListAllGroups
             if f'create_category' in oArgs:
                 aCategoryFields['group']['value'] = sSelGroup
-        if (f'edit_account' in oArgs) or (f'create_account' in oArgs):
+        if (sName=='account') and ((f'edit_account' in oArgs) or (f'create_account' in oArgs)):
             aAccountFields['group']['list'] = aListAllGroups
             aAccountFields['category']['list'] = aListAllCategories
             if f'create_category' in oArgs:
                 aAccountFields['group']['value'] = sSelGroup
                 aAccountFields['category']['value'] = sSelCategory
-            dFormsFieldsList = fnPrepareFormFields(aAccountFields, 'Account', sSelAccount)
             if (f'edit_account' in oArgs):
+                dFormsFieldsList = fnPrepareFormFields(aAccountFields, 'Account', sSelAccount)
+                # NOTE: Account - edit
                 return render_template(f'{sName}/edit.html',
+                    oArgs=oArgs,
                     dFormsFieldsList=dFormsFieldsList
                 )
-            if (f'create_account' in oArgs):
+            elif (f'create_account' in oArgs):
+                print('>>',sName)
+                dFormsFieldsList = fnPrepareFormFields(aAccountFields, 'Account', 0)
+                # NOTE: Account - create
                 return render_template(f'{sName}/create.html',
+                    oArgs=oArgs,
                     dFormsFieldsList=dFormsFieldsList
                 )
         if f'create_{sName}' in oArgs:
             dFormsFieldsList = {}
             if sName == 'group':
-                dFormsFieldsList = aGroupFields
+                dFormsFieldsList = fnPrepareFormFields(aGroupFields, 'Group', 0)
             if sName == 'category':
-                dFormsFieldsList = aCategoryFields
+                dFormsFieldsList = fnPrepareFormFields(aCategoryFields, 'Category', 0)
+            # NOTE: Group, Category - create
+            print(">>", dFormsFieldsList)
             return render_template(f'{sName}/create.html',
                 oArgs=oArgs,
                 dFormsFieldsList=dFormsFieldsList
@@ -444,6 +457,7 @@ def index():
                 dFormsFieldsList = fnPrepareFormFields(aGroupFields, 'Group', sSelGroup)
             if sName == 'category':
                 dFormsFieldsList = fnPrepareFormFields(aCategoryFields, 'Category', sSelCategory)
+            # NOTE: Group, Category - edit
             return render_template(f'{sName}/edit.html',
                 oArgs=oArgs,
                 dFormsFieldsList=dFormsFieldsList

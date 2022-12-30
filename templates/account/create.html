@@ -5,6 +5,7 @@
 <div class="message-box">
 <form action="">
 
+{{ macros.form_hidden_fields(oArgs) }}
 {{ macros.form_text_fields(dFormsFieldsList, "account") }}
 
 </form>
