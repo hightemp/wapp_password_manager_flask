@@ -152,16 +152,10 @@ def fnIterCategories(iGroupID, aOpened, sCategoryFilter, aCategories=[], iLevel=
     if (iLevel==0):
         aQueryCategories = []
 
-        if sCategoryFilter!='':
-            if str(iGroupID)=="-1":
-                aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == None)
-            else: 
-                aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == None, Category.group == iGroupID)
-        else:
-            if str(iGroupID)=="-1":
-                aQueryCategories = Category.select().where(Category.parent == None)
-            else: 
-                aQueryCategories = Category.select().where(Category.parent == None, Category.group == iGroupID)
+        if str(iGroupID)=="-1":
+            aQueryCategories = Category.select().where(Category.name ** f"%{sCategoryFilter}%", Category.parent == None)
+        else: 
+            aQueryCategories = Category.select().where(Category.name ** f"%{sCategoryFilter}%", Category.parent == None, Category.group == iGroupID)
 
         return fnIterCategories(iGroupID, aOpened, sCategoryFilter, aQueryCategories, 1)
     else:
@@ -175,7 +169,7 @@ def fnIterCategories(iGroupID, aOpened, sCategoryFilter, aCategories=[], iLevel=
                 aQueryCategories = Category.select().where(Category.name ** f"%{sCategoryFilter}%", Category.parent == sID, Category.group == iGroupID)
             
             if sCategoryFilter!='':
-                aQueryCategories.where(Category.name % sCategoryFilter)
+                aQueryCategories.where(Category.name ** f"%{sCategoryFilter}%")
 
             aIterCategories = []
             if (sID in aOpened) and aQueryCategories and len(aQueryCategories)>0:
