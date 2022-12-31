@@ -138,7 +138,7 @@ body, html {
 
 .grid-table-row {
     display: grid;
-    grid-template-columns: 100px 100px 200px 200px 200px 32px;
+    grid-template-columns: 100px 100px 200px 200px auto 32px;
 }
 
 .grid-table-cell {
