@@ -103,3 +103,31 @@ body, html {
 .active .bg-primary {
     background: rgba(255, 255, 255, 0.3) !important;
 }
+
+
+.table-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grid-table {
+    width: auto;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+}
+
+.grid-table-row {
+    display: grid;
+    grid-template-columns: 100px 100px 200px 200px 200px 32px;
+}
+
+.grid-table-cell {
+    border-top: 1px solid #eee;
+    border-left: 1px solid #eee;
+}
+
+.header-cell {
+    background: #eee;
+    font-weight: bold;
+}

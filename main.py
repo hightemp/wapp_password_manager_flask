@@ -11,6 +11,7 @@ import datetime
 from peewee import *
 from playhouse.shortcuts import model_to_dict
 import zipfile
+from flask_caching import Cache
 
 # NOTE: Константы
 UPLOAD_PATH_REL = "static/uploads"
@@ -22,6 +23,13 @@ __DEMO__ = False
 # NOTE: Переменные
 bFirstStart = not os.path.isfile(DATABASE)
 app = Flask(__name__)
+config = {
+    # "DEBUG": True,          # some Flask specific configs
+    # "CACHE_TYPE": "SimpleCache",  # Flask-Caching related configs
+    "CACHE_DEFAULT_TIMEOUT": 300
+}
+app.config.from_mapping(config)
+cache = Cache(app)
 db = SqliteDatabase(DATABASE)
 
 # NOTE: Модели
@@ -139,6 +147,7 @@ def parse_multi_form(form):
 
     return data
 
+@cache.cached(timeout=500)
 def fnIterCategories(iGroupID, aOpened, sCategoryFilter, aCategories=[], iLevel=0):
     if (iLevel==0):
         aQueryCategories = []
@@ -160,17 +169,11 @@ def fnIterCategories(iGroupID, aOpened, sCategoryFilter, aCategories=[], iLevel=
         for oCategory in aCategories:
             sID = oCategory.id
 
-            if sCategoryFilter!='':
-                if str(iGroupID)=="-1":
-                    aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == sID)
-                else: 
-                    aQueryCategories = Category.select().where(Category.name % sCategoryFilter, Category.parent == sID, Category.group == iGroupID)
-            else:
-                if str(iGroupID)=="-1":
-                    aQueryCategories = Category.select().where(Category.parent == sID)
-                else: 
-                    aQueryCategories = Category.select().where(Category.parent == sID, Category.group == iGroupID)
-
+            if str(iGroupID)=="-1":
+                aQueryCategories = Category.select().where(Category.name ** f"%{sCategoryFilter}%", Category.parent == sID)
+            else: 
+                aQueryCategories = Category.select().where(Category.name ** f"%{sCategoryFilter}%", Category.parent == sID, Category.group == iGroupID)
+            
             if sCategoryFilter!='':
                 aQueryCategories.where(Category.name % sCategoryFilter)
 
@@ -244,18 +247,12 @@ aAccountFields = {
         'field_name': 'id',
         'value': '',
     },
-    'group': {
-        'name': 'Группа',
-        'type': 'select',
-        'list': [],
-        'value': '',
-    },
     'category': {
         'name': 'Категория',
         'type': 'select',
         'field_name': 'category',
         'list': [],
-        'value': '',
+        'sel_value': '',
     },
     'name': {
         'name': 'Название',
@@ -316,13 +313,16 @@ def fnPrepareFormFields(aFields, cCls, sSelID):
             pass
 
     for sK, oV in aFields.items():
-        if sSelID==0:
-            aFields[sK]['value'] = ''
+        if 'sel_value' in aFields[sK]:
+            aFields[sK]['value'] = aFields[sK]['sel_value']
         else:
-            if sK in oItem and oItem[sK]:
-                aFields[sK]['value'] = oItem[oV['field_name']]
-            else:
+            if sSelID==0:
                 aFields[sK]['value'] = ''
+            else:
+                if sK in oItem and oItem[sK]:
+                    aFields[sK]['value'] = oItem[oV['field_name']]
+                else:
+                    aFields[sK]['value'] = ''
     return aFields
 
 def readfile(sFilePath):
@@ -351,6 +351,7 @@ def zip_static(path):
     return oR
 
 @app.route("/", methods=['GET', 'POST'])
+@cache.cached()
 def index():
     sBaseURL = request.url
 
@@ -378,19 +379,10 @@ def index():
         if len(aForCategoryAccounts)==0 and str(sSelAccount)!="-1":
             sSelAccount = ''
 
-    # NOTE: Группы
-    oListAllGroups = Group.select()
-    oListAllCategories = Category.select()
     aListAllGroups = []
     aListAllCategories = []
-    for oI in oListAllGroups:
-        aListAllGroups += [oI]
-    for oI in oListAllCategories:
-        aListAllCategories += [oI]
-    aGroups = [{'id':-1,'name':'Все','short':1}] + aListAllGroups
 
     # NOTE: Формы
-    print("!!! ", oArgs)
     if f'cancel' in oArgs:
         return redirect("/")
     for sName in ['group', 'category', 'account']:
@@ -405,7 +397,7 @@ def index():
             for sGroupID in oArgsLists[sName]:
                 Klass.delete().where(Klass.id == sGroupID).execute()
             del oArgs[f'accept_remove_{sName}']
-            break;
+            break
         if f'remove_{sName}' in oArgs:
             return render_template(f'{sName}/alert_delete.html', aFields=oArgs)        
         if f'save_{sName}' in oArgs:
@@ -424,19 +416,30 @@ def index():
                 Klass.update(oF).where(Klass.id==sID).execute()
             else:
                 Klass.create(**oF).save()
+
+            # FIXME: Дубль кода
+            oListAllGroups = Group.select()
+            oListAllCategories = Category.select()
+            aListAllGroups = []
+            aListAllCategories = []
+            for oI in oListAllGroups:
+                aListAllGroups += [oI]
+            for oI in oListAllCategories:
+                aListAllCategories += [oI]
+
             del oArgs[f'save_{sName}']
-            break;
+            break
             # return redirect("/")
+        if f'clean_{sName}' in oArgs:
+            break
+        
+        aAccountFields['category']['list'] = aListAllCategories
+        aAccountFields['category']['sel_value'] = sSelCategory
+
         if (sName=='category') and ((f'edit_category' in oArgs) or (f'create_category' in oArgs)):
             aCategoryFields['group']['list'] = aListAllGroups
-            if f'create_category' in oArgs:
-                aCategoryFields['group']['value'] = sSelGroup
+            aCategoryFields['group']['sel_value'] = sSelGroup
         if (sName=='account') and ((f'edit_account' in oArgs) or (f'create_account' in oArgs)):
-            aAccountFields['group']['list'] = aListAllGroups
-            aAccountFields['category']['list'] = aListAllCategories
-            if f'create_category' in oArgs:
-                aAccountFields['group']['value'] = sSelGroup
-                aAccountFields['category']['value'] = sSelCategory
             if (f'edit_account' in oArgs):
                 dFormsFieldsList = fnPrepareFormFields(aAccountFields, 'Account', sSelAccount)
                 # NOTE: Account - edit
@@ -445,7 +448,6 @@ def index():
                     dFormsFieldsList=dFormsFieldsList
                 )
             elif (f'create_account' in oArgs):
-                print('>>',sName)
                 dFormsFieldsList = fnPrepareFormFields(aAccountFields, 'Account', 0)
                 # NOTE: Account - create
                 return render_template(f'{sName}/create.html',
@@ -459,7 +461,6 @@ def index():
             if sName == 'category':
                 dFormsFieldsList = fnPrepareFormFields(aCategoryFields, 'Category', 0)
             # NOTE: Group, Category - create
-            print(">>", dFormsFieldsList)
             return render_template(f'{sName}/create.html',
                 oArgs=oArgs,
                 dFormsFieldsList=dFormsFieldsList
@@ -475,9 +476,21 @@ def index():
                 oArgs=oArgs,
                 dFormsFieldsList=dFormsFieldsList
             )
-        if f'clean_{sName}' in oArgs:
-            pass
-    
+
+    oListAllGroups = Group.select().where(Group.name ** f"%{sGroupFilter}%")
+    print(oListAllGroups)
+    oListAllCategories = Category.select().where(Category.name ** f"%{sCategoryFilter}%")
+    aListAllGroups = []
+    aListAllCategories = []
+    for oI in oListAllGroups:
+        aListAllGroups += [oI]
+    for oI in oListAllCategories:
+        aListAllCategories += [oI]
+
+    # NOTE: Группы
+    aGroups = [{'id':-1,'name':'Все','short':1}] + aListAllGroups
+
+
     aOpenedCategories = []
     if 'category' in oArgsLists:
         aOpenedCategories = oArgsLists["category"]
@@ -489,10 +502,10 @@ def index():
     aAccountFieldsList = []
     if sSelCategory != '':
         if str(sSelCategory)=="-1":
-            aAccounts = Account.select()
+            aAccounts = Account.select().where(Account.name ** f"%{sAccountFilter}%")
         else:
-            aAccounts = Account.select().where(Account.category==sSelCategory)
-        aAccountFields['group']['list'] = aListAllGroups
+            aAccounts = Account.select().where(Account.category==sSelCategory, Account.name ** f"%{sAccountFilter}%")
+        # aAccountFields['group']['list'] = aListAllGroups
         aAccountFields['category']['list'] = aListAllCategories
         aAccountFieldsList = fnPrepareFormFields(aAccountFields, 'Account', sSelAccount)
 
@@ -510,6 +523,24 @@ def index():
         sGroupFilter=sGroupFilter,
         sCategoryFilter=sCategoryFilter,
         sAccountFilter=sAccountFilter
+    )
+
+def models_col_to_list(lModelsCol):
+    lList = []
+    for oA in lModelsCol:
+        lList.append(model_to_dict(oA))
+
+    return lList
+
+@app.route("/as_table", methods=['GET', 'POST'])
+@cache.cached()
+def as_table():
+    oAccounts = Account.select().join(Category).join(Group)
+    oAccounts = models_col_to_list(oAccounts)
+
+    return render_template(
+        'table.html', 
+        oAccounts=oAccounts
     )
 
 def run():
