@@ -394,6 +394,17 @@ def index():
             break
         if f'remove_{sName}' in oArgs:
             return render_template(f'{sName}/alert_delete.html', aFields=oArgs)        
+
+        # FIXME: Дубль кода
+        oListAllGroups = Group.select()
+        oListAllCategories = Category.select()
+        aListAllGroups = []
+        aListAllCategories = []
+        for oI in oListAllGroups:
+            aListAllGroups += [oI]
+        for oI in oListAllCategories:
+            aListAllCategories += [oI]
+
         if f'save_{sName}' in oArgs:
             Klass = globals()[aClasses[sName]]
             aFields = globals()['a'+aClasses[sName]+'Fields']
@@ -410,16 +421,6 @@ def index():
                 Klass.update(oF).where(Klass.id==sID).execute()
             else:
                 Klass.create(**oF).save()
-
-            # FIXME: Дубль кода
-            oListAllGroups = Group.select()
-            oListAllCategories = Category.select()
-            aListAllGroups = []
-            aListAllCategories = []
-            for oI in oListAllGroups:
-                aListAllGroups += [oI]
-            for oI in oListAllCategories:
-                aListAllCategories += [oI]
 
             del oArgs[f'save_{sName}']
             break
