@@ -1,4 +1,4 @@
-from flask import g, Flask, render_template, request, send_file, redirect, session, jsonify
+from flask import g, Flask, request, send_file, redirect, session, jsonify
 import os
 import re
 from werkzeug.utils import secure_filename
@@ -330,6 +330,16 @@ def readfile(sFilePath):
             # print("[!] "+f.read().decode("utf-8"))
             return f.read()
     return "ERROR"
+
+def load_template(name):
+    return readfile("templates/"+name).decode("utf-8")
+
+oTempFunctionLoader = FunctionLoader(load_template)
+
+def render_template(name, **kwargs):
+    data = load_template(name)
+    tpl = Environment(loader=oTempFunctionLoader).from_string(data)
+    return tpl.render(**kwargs)
 
 @app.route("/zip/static/<path:path>", methods=['GET', 'POST'])
 def zip_static(path):
