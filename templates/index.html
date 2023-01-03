@@ -8,13 +8,13 @@
         <a href="/" class="btn btn-primary"><i class="bi bi-house"></i></a>
         <a href="/as_table" class="btn btn-primary"><i class="bi bi-table"></i></a>
     </div>
-    {{ macros.list_panel(aGroups, sSelGroup, "group", sGroupFilter) }}
-    {% if sSelGroup %}
-    {{ macros.tree_panel(aCategories, sSelCategory, "category", aOpenedCategories, sCategoryFilter) }}
-        {% if sSelCategory %}
-            {{ macros.list_panel(aAccounts, sSelAccount, "account", sAccountFilter) }}
-            {% if sSelAccount %}
-            {{ macros.form_text_fields(aAccountFieldsList,"account") }}
+    {{ macros.list_panel(oR.aGroups, oR.sSelectGroup, "group", oR.sGroupFilter) }}
+    {% if oR.sSelectGroup %}
+    {{ macros.tree_panel(oR.aCategories, oR.sSelectCategory, "category", oR.aOpenedCategories, oR.sCategoryFilter) }}
+        {% if oR.sSelectCategory %}
+            {{ macros.list_panel(oR.aAccounts, oR.sSelectAccount, "account", oR.sAccountFilter) }}
+            {% if oR.sSelectAccount %}
+            {{ macros.form_text_fields(oR.aAccountFieldsList,"account") }}
             {% endif %}
         {% endif %}
     {% endif %}

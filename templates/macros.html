@@ -42,10 +42,10 @@
 
     <div class="btn-group w100">
         <button class="btn btn-primary" type="submit" name="reload" value="1"><i class="bi bi-arrow-repeat"></i></button>
-        <button class="btn btn-success" type="submit" name="create_{{sName}}" value="1"><i class="bi bi-file-plus"></i></button>
-        <button class="btn btn-secondary" type="submit" name="edit_{{sName}}" value="1"><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-danger" type="submit" name="remove_{{sName}}" value="1"><i class="bi bi-trash"></i></button>
-        <button class="btn btn-danger" type="submit" name="clean_{{sName}}" value="1"><i class="bi bi-trash-fill"></i></button>
+        <button class="btn btn-success" type="submit" name="create-{{sName}}" value="1"><i class="bi bi-file-plus"></i></button>
+        <button class="btn btn-secondary" type="submit" name="edit-{{sName}}" value="1"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-danger" type="submit" name="remove-{{sName}}" value="1"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-danger" type="submit" name="clean-{{sName}}" value="1"><i class="bi bi-trash-fill"></i></button>
     </div>
 
     <div class="list-group left-panel-list">
@@ -105,10 +105,10 @@
 
     <div class="btn-group w100">
         <button class="btn btn-primary" type="submit" name="reload" value="1"><i class="bi bi-arrow-repeat"></i></button>
-        <button class="btn btn-success" title="" type="submit" name="create_{{sName}}" value="1"><i class="bi bi-file-plus"></i></button>
-        <button class="btn btn-secondary" title="" type="submit" name="edit_{{sName}}" value="1"><i class="bi bi-pencil"></i></button>
-        <button class="btn btn-danger" title="" type="submit" name="remove_{{sName}}" value="1"><i class="bi bi-trash"></i></button>
-        <button class="btn btn-danger" title="" type="submit" name="clean_{{sName}}" value="1"><i class="bi bi-trash-fill"></i></button>
+        <button class="btn btn-success" title="" type="submit" name="create-{{sName}}" value="1"><i class="bi bi-file-plus"></i></button>
+        <button class="btn btn-secondary" title="" type="submit" name="edit-{{sName}}" value="1"><i class="bi bi-pencil"></i></button>
+        <button class="btn btn-danger" title="" type="submit" name="remove-{{sName}}" value="1"><i class="bi bi-trash"></i></button>
+        <button class="btn btn-danger" title="" type="submit" name="clean-{{sName}}" value="1"><i class="bi bi-trash-fill"></i></button>
     </div>
 
     <div class="list-group left-panel-list">
@@ -206,7 +206,7 @@
         {% endif %}
     {% endfor %}
 
-    <button type="submit" class="btn btn-success" name="save_{{sName}}" value="1">Сохранить</button>
+    <button type="submit" class="btn btn-success" name="save-{{sName}}" value="1">Сохранить</button>
     <button type="button" class="btn btn-danger" name="cancel" value="1" onclick="history.go(-1)">Отмена</button>
 </div>
 {%- endmacro %}
