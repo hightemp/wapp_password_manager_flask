@@ -5,7 +5,7 @@ from baselib import *
 
 UPLOAD_PATH_REL = "static/uploads"
 UPLOAD_PATH = os.path.join(os.path.dirname(__file__), UPLOAD_PATH_REL)
-DATABASE = './wapp_task_manager_flask.database.db'
+DATABASE = './wapp_password_manager_flask.database.db'
 
 __DEMO__ = True
 
