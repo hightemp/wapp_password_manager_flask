@@ -25,7 +25,7 @@ gh release create $VERSION -t $VERSION -n "" --target main
 # cd $CFILE
 
 pyinstaller -F --path "." --add-data "templates:templates" --add-data "static:static" --hidden-import "main" --hidden-import "baselib" --hidden-import "database" --hidden-import "request_vars" __main__.py
-cp dist/__main__ ../$CFILE
+cp dist/__main__ ../{$CFILE}_exec
 
-gh release upload $VERSION ../$CFILE --clobber
+gh release upload $VERSION ../{$CFILE}_exec --clobber
 
