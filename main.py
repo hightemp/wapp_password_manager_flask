@@ -22,6 +22,7 @@ UPLOAD_PATH = os.path.join(os.path.dirname(__file__), UPLOAD_PATH_REL)
 DATABASE = './wapp_password_manager_flask.database.db'
 
 __DEMO__ = False
+APP_NAME=__name__
 
 # NOTE: Переменные
 bFirstStart = not os.path.isfile(DATABASE)

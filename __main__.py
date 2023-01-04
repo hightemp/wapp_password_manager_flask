@@ -3,6 +3,10 @@
 import sys
 import main
 
+import baselib
+import request_vars
+import database
+
 from gunicorn.app.base import Application, Config
 import gunicorn
 from gunicorn import glogging

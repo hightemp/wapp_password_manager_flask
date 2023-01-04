@@ -1,21 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+
 block_cipher = None
 
-td = []
-td += Tree('./static', 'static')
-td += Tree('./templates', 'templates')
-d = []
-
-for tdt in td:
-    d.append((tdt[0], '.'))
 
 a = Analysis(
     ['__main__.py'],
-    pathex=["."],
+    pathex=['.'],
     binaries=[],
-    datas=d,
-    hiddenimports=["main","baselib","database","request_vars","gunicorn","gunicorn.glogging.Logger"],
+    datas=[('templates', 'templates'), ('static', 'static')],
+    hiddenimports=['main', 'baselib', 'database', 'request_vars'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

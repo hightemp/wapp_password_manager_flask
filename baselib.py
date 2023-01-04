@@ -15,7 +15,8 @@ def readfile(sFilePath):
     if (__DEBUG__):
         return open(sFilePath, 'rb').read()
     elif (__PYINST__):
-        return pkgutil.get_data( 'pkgdata', sFilePath )
+        print(sFilePath)
+        return pkgutil.get_data('main', sFilePath )
     else:
         with zipfile.ZipFile(os.path.dirname(__file__)) as z:
             # print(z.namelist())
