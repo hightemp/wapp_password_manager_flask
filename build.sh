@@ -12,7 +12,9 @@ CFILE=wapp_password_manager_flask
 # dist/__main__  --bind 0.0.0.0:5010
 
 pyinstaller -F --path "." --add-data "templates:templates" --add-data "static:static" --hidden-import "main" --hidden-import "baselib" --hidden-import "database" --hidden-import "request_vars" __main__.py
-dist/__main__  --bind 0.0.0.0:5010
+cp dist/__main__ ../$CFILE
+cd ..
+$CFILE  --bind 0.0.0.0:5010
 
 # python3 -m zipapp $CFILE -p "/usr/bin/env python3"
 # echo $PWD/$CFILE.pyz

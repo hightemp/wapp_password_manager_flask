@@ -19,8 +19,13 @@ fi
 echo "[!] " gh release create $VERSION -t $VERSION -n '""' --target main
 gh release create $VERSION -t $VERSION -n "" --target main
 
-cd ..
-python3 -m zipapp $CFILE -p "/usr/bin/env python3"
-echo $PWD/$CFILE.pyz
-cd $CFILE
-gh release upload $VERSION ../$CFILE.pyz --clobber
+# cd ..
+# python3 -m zipapp $CFILE -p "/usr/bin/env python3"
+# echo $PWD/$CFILE.pyz
+# cd $CFILE
+
+pyinstaller -F --path "." --add-data "templates:templates" --add-data "static:static" --hidden-import "main" --hidden-import "baselib" --hidden-import "database" --hidden-import "request_vars" __main__.py
+cp dist/__main__ ../$CFILE
+
+gh release upload $VERSION ../$CFILE --clobber
+
