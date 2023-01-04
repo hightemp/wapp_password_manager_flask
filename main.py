@@ -139,56 +139,58 @@ def index():
         if f'remove-{sName}' in oR.oArgs:
             return render_template(f'{sName}/alert_delete.html', aFields=oR.oArgs)        
 
-        # FIXME: Дубль кода
-        oR.oListAllGroups = oMW.fnGetAllGroups()
-        oR.oListAllCategories = oMW.fnGetAllCategories()
-        oR.aListAllGroups = []
-        oR.aListAllCategories = []
-        for oI in oR.oListAllGroups:
-            oR.aListAllGroups += [oI]
-        for oI in oR.oListAllCategories:
-            oR.aListAllCategories += [oI]
-
         if f'save-{sName}' in oR.oArgs:
+            print(oR.oArgs[f'save-{sName}'], sName, oR.oArgs)
             oMW.fmUpdateFromFields(sName)
             del oR.oArgs[f'save-{sName}']
+            del oR.oArgs[f'edit-{sName}']
             break
         if f'clean-{sName}' in oR.oArgs:
             break
         
-        oR.aAccountFields['category']['list'] = oMW.fnGetAllCategories()
-        oR.aAccountFields['category']['sel_value'] = oR.sSelectCategory
+    # FIXME: Дубль кода
+    oR.oListAllGroups = oMW.fnGetAllGroups()
+    oR.oListAllCategories = oMW.fnGetAllCategories()
+    oR.aListAllGroups = []
+    oR.aListAllCategories = []
+    for oI in oR.oListAllGroups:
+        oR.aListAllGroups += [oI]
+    for oI in oR.oListAllCategories:
+        oR.aListAllCategories += [oI]
+    
+    oR.aAccountFields['category']['list'] = oMW.fnGetAllCategories()
+    oR.aAccountFields['category']['sel_value'] = oR.sSelectCategory
 
-        if (sName=='category') and ((f'edit-category' in oR.oArgs) or (f'create-category' in oR.oArgs)):
-            oR.aCategoryFields['group']['list'] = oMW.fnGetAllGroups()
-            oR.aCategoryFields['group']['sel_value'] = oR.sSelectGroup
-        if (sName=='account') and ((f'edit-account' in oR.oArgs) or (f'create-account' in oR.oArgs)):
-            if (f'edit-account' in oR.oArgs):
-                oR.dFormsFieldsList = fnPrepareFormFields(oR.aAccountFields, 'Account', oR.sSelectAccount)
-                # NOTE: Account - edit
-                return render_template(f'{sName}/edit.html',oR=oR)
-            elif (f'create-account' in oR.oArgs):
-                oR.dFormsFieldsList = fnPrepareFormFields(oR.aAccountFields, 'Account', 0)
-                # NOTE: Account - create
-                return render_template(f'{sName}/create.html', oR=oR)
-        if f'create-group' in oR.oArgs:
-            oR.dFormsFieldsList = {}
-            oR.dFormsFieldsList = fnPrepareFormFields(oR.aGroupFields, 'Group', 0)
-            return render_template(f'{sName}/create.html',oR=oR)
-        if f'create-category' in oR.oArgs:
-            oR.dFormsFieldsList = {}
-            oR.dFormsFieldsList = fnPrepareFormFields(oR.aCategoryFields, 'Category', 0)
-            # NOTE: Group, Category - create
-            return render_template(f'{sName}/create.html',oR=oR)
-        if f'edit-group' in oR.oArgs:
-            oR.dFormsFieldsList = {}
-            oR.dFormsFieldsList = fnPrepareFormFields(oR.aGroupFields, 'Group', oR.sSelectGroup)
-            return render_template(f'{sName}/edit.html',oR=oR)            
-        if f'edit-category' in oR.oArgs:
-            oR.dFormsFieldsList = {}
-            oR.dFormsFieldsList = fnPrepareFormFields(oR.aCategoryFields, 'Category', oR.sSelectCategory)
-            # NOTE: Group, Category - edit
-            return render_template(f'{sName}/edit.html',oR=oR)
+    if ((f'edit-category' in oR.oArgs) or (f'create-category' in oR.oArgs)):
+        oR.aCategoryFields['group']['list'] = oMW.fnGetAllGroups()
+        oR.aCategoryFields['group']['sel_value'] = oR.sSelectGroup
+    if ((f'edit-account' in oR.oArgs) or (f'create-account' in oR.oArgs)):
+        if (f'edit-account' in oR.oArgs):
+            oR.dFormsFieldsList = fnPrepareFormFields(oR.aAccountFields, 'Account', oR.sSelectAccount)
+            # NOTE: Account - edit
+            return render_template(f'account/edit.html',oR=oR)
+        elif (f'create-account' in oR.oArgs):
+            oR.dFormsFieldsList = fnPrepareFormFields(oR.aAccountFields, 'Account', 0)
+            # NOTE: Account - create
+            return render_template(f'account/create.html', oR=oR)
+    if f'create-group' in oR.oArgs:
+        oR.dFormsFieldsList = {}
+        oR.dFormsFieldsList = fnPrepareFormFields(oR.aGroupFields, 'Group', 0)
+        return render_template(f'group/create.html',oR=oR)
+    if f'create-category' in oR.oArgs:
+        oR.dFormsFieldsList = {}
+        oR.dFormsFieldsList = fnPrepareFormFields(oR.aCategoryFields, 'Category', 0)
+        # NOTE: Group, Category - create
+        return render_template(f'category/create.html',oR=oR)
+    if f'edit-group' in oR.oArgs:
+        oR.dFormsFieldsList = {}
+        oR.dFormsFieldsList = fnPrepareFormFields(oR.aGroupFields, 'Group', oR.sSelectGroup)
+        return render_template(f'group/edit.html',oR=oR)            
+    if f'edit-category' in oR.oArgs:
+        oR.dFormsFieldsList = {}
+        oR.dFormsFieldsList = fnPrepareFormFields(oR.aCategoryFields, 'Category', oR.sSelectCategory)
+        # NOTE: Group, Category - edit
+        return render_template(f'category/edit.html',oR=oR)
 
     oR.oListAllGroups = oMW.fnGetAllGroupsWithFilter()
     print(oR.oListAllGroups)
