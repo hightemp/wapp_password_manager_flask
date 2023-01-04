@@ -6,12 +6,16 @@ import os
 import zipfile
 from database import *
 from flask import g, Flask, request
+import pkgutil
 
 __DEBUG__ = False
+__PYINST__ = True
 
 def readfile(sFilePath):
     if (__DEBUG__):
         return open(sFilePath, 'rb').read()
+    elif (__PYINST__):
+        return pkgutil.get_data( 'pkgdata', sFilePath )
     else:
         with zipfile.ZipFile(os.path.dirname(__file__)) as z:
             # print(z.namelist())
