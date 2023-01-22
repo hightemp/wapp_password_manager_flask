@@ -104,6 +104,18 @@ def zip_static(path):
     oR.headers['Cache-Control'] = 'max-age=60480000, stale-if-error=8640000, must-revalidate'
     return oR
 
+@app.route("/export", methods=['GET', 'POST'])
+def export():
+    import json
+
+    oModel = Account.select().join(Category).join(Group)
+    oModel = list(oModel.dicts())
+    print(oModel)
+    json_data = json.dumps(oModel, default=more)
+    open('/tmp/json-export.json', 'w').write(json_data)
+
+    return send_file('/tmp/json-export.json', as_attachment=True)
+
 @app.route("/", methods=['GET', 'POST'])
 @cache.cached()
 def index():
@@ -144,9 +156,11 @@ def index():
             print(oR.oArgs[f'save-{sName}'], sName, oR.oArgs)
             oMW.fmUpdateFromFields(sName)
             del oR.oArgs[f'save-{sName}']
-            del oR.oArgs[f'edit-{sName}']
+            if f'edit-{sName}' in oR.oArgs:
+                del oR.oArgs[f'edit-{sName}']
             break
         if f'clean-{sName}' in oR.oArgs:
+            del oR.oArgs[f'clean-{sName}']
             break
         
     # FIXME: Дубль кода

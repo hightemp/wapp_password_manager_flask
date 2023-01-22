@@ -5,8 +5,9 @@
 
 <div class="wrapper">
     <div class="nav-panel">
-        <a href="/" class="btn btn-primary"><i class="bi bi-house"></i></a>
-        <a href="/as_table" class="btn btn-primary"><i class="bi bi-table"></i></a>
+        <a href="/" class="btn"><i class="bi bi-house"></i></a>
+        <a href="/as_table" class="btn"><i class="bi bi-table"></i></a>
+        <a href="/export" class="btn"><i class="bi bi-arrow-down-square"></i></a>
     </div>
     {{ macros.list_panel(oR.aGroups, oR.sSelectGroup, "group", oR.sGroupFilter) }}
     {% if oR.sSelectGroup %}
