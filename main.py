@@ -158,6 +158,8 @@ def index():
             del oR.oArgs[f'save-{sName}']
             if f'edit-{sName}' in oR.oArgs:
                 del oR.oArgs[f'edit-{sName}']
+            if f'create-{sName}' in oR.oArgs:
+                del oR.oArgs[f'edit-{sName}']
             break
         if f'clean-{sName}' in oR.oArgs:
             del oR.oArgs[f'clean-{sName}']
